@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.d": "asm",
+        "limits": "cpp"
+    }
+}
