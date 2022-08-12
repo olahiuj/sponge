@@ -5,15 +5,30 @@
 
 #include <cstdint>
 #include <string>
+#include <set>
+#include <vector>
+#include <algorithm>
 
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 //! possibly overlapping) into an in-order byte stream.
 class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
+    using segment_t = std::pair<std::pair<uint64_t, uint64_t>, std::string>;
 
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
+
+    uint64_t _iend;  //!< Index of the end byte of the entire stream
+    std::set<segment_t, std::less<segment_t>> _set; //!< Sorted ([l, r), substring) pair set
+    uint64_t _ilast; //!< Index of the last byte in `_output` stream
+    size_t _nbytes_holding; //!< Number of bytes holding in `_heap`
+
+    void append(const std::string &data, const uint64_t index);
+    void merge_left(decltype(_set)::iterator &it);
+    void merge_right(decltype(_set)::iterator &it);
+    segment_t merge(const segment_t &s1, const segment_t &s2);
+    bool overlap(const segment_t &s1, const segment_t &s2);
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
