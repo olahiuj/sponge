@@ -91,22 +91,24 @@ void StreamReassembler::push_substring(const string &data, const uint64_t index,
         _iend = data.length() + index;
     }
 
-    if (index <= _ilast) {
-        append(data, index);
+    if (!data.empty()) {
+        if (index <= _ilast) {
+            append(data, index);
 
-        while (!_set.empty() && _set.begin()->first.first <= _ilast) {
-            auto top = _set.begin();
-            _nbytes_holding -= top->second.length();
-            append(top->second, top->first.first);
-            _set.erase(top);
-        }
-    } else {
-        size_t _len = std::min(data.length(), _output.remaining_capacity());
-        if (_len > 0) {
-            auto it{_set.insert(make_pair(make_pair(index, index + _len), data.substr(0, _len))).first};
-            merge_left(it);
-            merge_right(it);
-            _nbytes_holding += _len;
+            while (!_set.empty() && _set.begin()->first.first <= _ilast) {
+                auto top = _set.begin();
+                _nbytes_holding -= top->second.length();
+                append(top->second, top->first.first);
+                _set.erase(top);
+            }
+        } else {
+            size_t _len = std::min(data.length(), _output.remaining_capacity());
+            if (_len > 0) {
+                auto it{_set.insert(make_pair(make_pair(index, index + _len), data.substr(0, _len))).first};
+                merge_left(it);
+                merge_right(it);
+                _nbytes_holding += _len;
+            }
         }
     }
     
